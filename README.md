@@ -270,3 +270,120 @@ Is that worth it for a few blinky lights? I don't know. I guess here's to hoping
 # Notes
 
 It appears that while the online-config API key distribution thing is fully in place, the glyph composer does not use it at all and is rather patched in to receive similar treatment to a system app - it never calls `register` at all. Curiously, this means that if you were to steal the composer package name, you'd probably lose background privileges because the composer does not technically have the correct permission scope for that and your forged packet would fail the fingerprint check in `openSession`. Now that I think of it, the composer probably doesn't really have these privileges in the first place, since it would fail the foreground check in `setFrameColors`.
+
+# Sample code for when nothing is cool or you spent big money on a brute force idk
+
+```kotlin
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
+import android.os.Bundle
+import android.os.IBinder
+import android.os.IInterface
+import android.os.Parcel
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val intent = Intent()
+        intent.setPackage("com.nothing.thirdparty")
+        intent.action = "com.nothing.thirdparty.bind_glyphservice"
+        intent.component = ComponentName("com.nothing.thirdparty", "com.nothing.thirdparty.GlyphService")
+        applicationContext.bindService(intent, Connection, BIND_AUTO_CREATE)
+
+        Connection.openSession()
+        Connection.setFrameColors(IntArray(33){ it * 10})
+        Connection.closeSession()
+    }
+}
+
+object Connection : ServiceConnection {
+    private lateinit var glyphI: GlyphI
+    override fun onServiceConnected(className: ComponentName, service: IBinder) {
+        Log.d("GlyphManager", "Service connected")
+        glyphI = GlyphI(service)
+    }
+
+    override fun onServiceDisconnected(className: ComponentName) {
+        Log.d("GlyphManager", "Service disconnected")
+    }
+
+    fun setFrameColors(values: IntArray) = glyphI.setFrameColors(values)
+    fun openSession() = glyphI.openSession()
+    fun closeSession() = glyphI.closeSession()
+}
+
+interface GlyphInterface : IInterface {
+    fun setFrameColors(iArr: IntArray)
+    fun closeSession()
+    fun openSession()
+    fun register(str: String): Boolean
+}
+
+class GlyphI(private val f6990a: IBinder) : GlyphInterface {
+
+    override fun setFrameColors(iArr: IntArray) {
+        val obtain = Parcel.obtain()
+        val obtain2 = Parcel.obtain()
+        try {
+            obtain.writeInterfaceToken("com.nothing.thirdparty.IGlyphService");
+            obtain.writeIntArray(iArr)
+            this.f6990a.transact(1, obtain, obtain2, 0)
+            obtain2.readException()
+        } finally {
+            obtain2.recycle()
+            obtain.recycle()
+        }
+    }
+
+    override fun asBinder(): IBinder {
+        return this.f6990a;
+    }
+
+    override fun closeSession() {
+        val obtain = Parcel.obtain()
+        val obtain2 = Parcel.obtain()
+        try {
+            obtain.writeInterfaceToken("com.nothing.thirdparty.IGlyphService")
+            this.f6990a.transact(3, obtain, obtain2, 0)
+            obtain2.readException()
+        } finally {
+            obtain2.recycle()
+            obtain.recycle()
+        }
+    }
+
+    override fun openSession() {
+        val obtain = Parcel.obtain()
+        val obtain2 = Parcel.obtain()
+        try {
+            obtain.writeInterfaceToken("com.nothing.thirdparty.IGlyphService")
+            this.f6990a.transact(2, obtain, obtain2, 0)
+            obtain2.readException()
+        } finally {
+            obtain2.recycle()
+            obtain.recycle()
+        }
+    }
+
+    override fun register(str: String): Boolean {
+        val obtain = Parcel.obtain()
+        val obtain2 = Parcel.obtain()
+        try {
+            obtain.writeInterfaceToken("com.nothing.thirdparty.IGlyphService");
+            obtain.writeString(str)
+            this.f6990a.transact(4, obtain, obtain2, 0)
+            val res = obtain2.readBoolean()
+            obtain2.readException()
+            return res
+        } finally {
+            obtain2.recycle()
+            obtain.recycle()
+        }
+    }
+}
+```
