@@ -244,6 +244,29 @@ Well, there's one interesting quirk: Once an app has registered, it never loses 
 
 In this case, the `checkAlreadyAuth` check should succeed because it only uses your package name to look up authentication status. Note that I tried this approach briefly and couldn't get it to work, but that might just be my lacking android skills.
 
+But there's one other and potentially even more powerful trick: Recall the curious line in `openSession` that allows the composer to authenticate without ever calling `register` with an API key:
+
+```java
+if ("com.nothing.glyph.composer".equals(callingPackageName) && Utils.checkFingerprint(GlyphService.this.mContext, callingPackageName)) {
+    GlyphService.this.mAuth.addAlreadyAuth(callingPackageName, callingUid);
+    ...
+}
+```
+
+It turns out that bizarrely, the implementation of `checkFingerprint` looks like this:
+
+```java
+public static boolean checkFingerprint(Context context, String str) {
+        return getCertificateFingerprint(context, str).contains("95E1F157FE98518");
+    }
+```
+
+See the issue? Not only does it only check for 60 of the 160 bits in the SHA1 hash of the signing key, it also accepts any fingerprint that has these 60 bits **in any position** (aligned to 4bit). This means that it is _very theoretically_ feasible to brute force an android signing key whose SHA1 hash contains this magic substring, which would allow you to impersonate the glyph composer and use the lights as you please.
+
+My combinatorics are a bit rusty but if my math is correct about 1 in 2^55 keys should have this magic property --- that's very very rare, but not completely out there, given that people have been brute-forcing 56bit [DES](https://en.wikipedia.org/wiki/Data_Encryption_Standard) keys successfully many years back, and high-end GPUs seem to be capable of doing so in a handful of days.
+
+Is that worth it for a few blinky lights? I don't know. I guess here's to hoping that nothing will open up the API eventually.
+
 # Notes
 
 It appears that while the online-config API key distribution thing is fully in place, the glyph composer does not use it at all and is rather patched in to receive similar treatment to a system app - it never calls `register` at all. Curiously, this means that if you were to steal the composer package name, you'd probably lose background privileges because the composer does not technically have the correct permission scope for that and your forged packet would fail the fingerprint check in `openSession`. Now that I think of it, the composer probably doesn't really have these privileges in the first place, since it would fail the foreground check in `setFrameColors`.
