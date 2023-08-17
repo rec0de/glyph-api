@@ -77,11 +77,11 @@ interface GlyphInterface : IInterface {
 }
 ```
 
-Looks pretty straightforward, right? You connect to the service, call `openSession` and then control the lights using `setFrameColor`, which I strongly suspect takes 33 brightness values for each of the addressable zones --- I'll put a very minimal example on how you would use this in an app at the bottom.
+Looks pretty straightforward, right? You connect to the service, call `openSession` and then control the lights using `setFrameColor`, which I strongly suspect takes 33 brightness values for each of the addressable zones — I'll put a very minimal example on how you would use this in an app at the bottom.
 
 # Obstacles
 
-There's just one problem: Nothing doesn't want you to do that. Let's have a look at the `com.nothing.thirdparty` package to see what's going on. Here's a condensed version of the `` file that is essentially the 'other end' of the `GlyphInterface` we've seen in the composer.
+There's just one problem: Nothing doesn't want you to do that. Let's have a look at the `com.nothing.thirdparty` package to see what's going on. Here's a condensed version of the `GlyphService.java` file that is essentially the 'other end' of the `GlyphInterface` we've seen in the composer.
 
 ```java
 public class GlyphService extends Service {
@@ -170,7 +170,7 @@ public class GlyphService extends Service {
 }
 ```
 
-See how we have to get through all these if statements in `openSession`? Let's break that down: Essentially, we have a call to `mAtuh.checkAlreadyAuth(ourPackageName)` that has to return true for us to get anywhere. Also, the glyph composer and system apps (pid 1000) explicitly get some special treatment that allows them to run in the background. Similar rules apply in `setFrameColors` --- - we have to be authenticated and running in the foreground (unless we have special privileges).
+See how we have to get through all these if statements in `openSession`? Let's break that down: Essentially, we have a call to `mAtuh.checkAlreadyAuth(ourPackageName)` that has to return true for us to get anywhere. Also, the glyph composer and system apps (pid 1000) explicitly get some special treatment that allows them to run in the background. Similar rules apply in `setFrameColors` — we have to be authenticated and running in the foreground (unless we have special privileges).
 
 The way we authenticate ourselves seems to be the `register(str)` method, but let's look into the `AuthController.java` file to see how exactly:
 
@@ -228,7 +228,7 @@ public static String getCertificateFingerprint(Context context, String str) {
 }
 ```
 
-So things are looking rather grim --- short of begging nothing to give you an API key specifically tied to your app signing credentials, there's not really a way to make this work. And you'll need an extra special key if you want to do things in the background, which is probably even more unrealistic to obtain. You can't extract or steal credentials from other apps, and you can't even patch existing apps that have valid credentials, because either of those options break the signature fingerprint.
+So things are looking rather grim — short of begging nothing to give you an API key specifically tied to your app signing credentials, there's not really a way to make this work. And you'll need an extra special key if you want to do things in the background, which is probably even more unrealistic to obtain. You can't extract or steal credentials from other apps, and you can't even patch existing apps that have valid credentials, because either of those options break the signature fingerprint.
 
 # Praxis?
 
@@ -263,13 +263,15 @@ public static boolean checkFingerprint(Context context, String str) {
 
 See the issue? Not only does it only check for 60 of the 160 bits in the SHA1 hash of the signing key, it also accepts any fingerprint that has these 60 bits **in any position** (aligned to 4bit). This means that it is _very theoretically_ feasible to brute force an android signing key whose SHA1 hash contains this magic substring, which would allow you to impersonate the glyph composer and use the lights as you please.
 
-My combinatorics are a bit rusty but if my math is correct about 1 in 2^55 keys should have this magic property --- that's very very rare, but not completely out there, given that people have been brute-forcing 56bit [DES](https://en.wikipedia.org/wiki/Data_Encryption_Standard) keys successfully many years back, and high-end GPUs seem to be capable of doing so in a handful of days.
+My combinatorics are a bit rusty but if my math is correct about 1 in 2^55 keys should have this magic property — that's very very rare, but not completely out there, given that people have been brute-forcing 56bit [DES](https://en.wikipedia.org/wiki/Data_Encryption_Standard) keys successfully many years back, and high-end GPUs seem to be capable of doing so in a handful of days.
 
 Is that worth it for a few blinky lights? I don't know. I guess here's to hoping that nothing will open up the API eventually.
 
 # Notes
 
 It appears that while the online-config API key distribution thing is fully in place, the glyph composer does not use it at all and is rather patched in to receive similar treatment to a system app - it never calls `register` at all. Curiously, this means that if you were to steal the composer package name, you'd probably lose background privileges because the composer does not technically have the correct permission scope for that and your forged packet would fail the fingerprint check in `openSession`. Now that I think of it, the composer probably doesn't really have these privileges in the first place, since it would fail the foreground check in `setFrameColors`.
+
+Oh also: Maybe it's possible to intercept network requests to nothing's servers somehow and inject your own keys into the JSON? I haven't really looked into this since packet captures on non-rooted phones tend to be a bit of a pain. Seems likely that they would use certificate pinning anyway.
 
 # Sample code for when nothing is cool or you spent big money on a brute force idk
 
