@@ -26,7 +26,7 @@ public class GlyphProgressFragment extends Fragment {
 
     private final int MAX_MINS_LEFT = 10;
     private int minsLeft = MAX_MINS_LEFT;
-
+    private boolean isProgressInit = false;
 
     private NotificationManagerCompat notificationManager;
 
@@ -45,15 +45,27 @@ public class GlyphProgressFragment extends Fragment {
         CreateNotificationChannel();
         notificationManager = NotificationManagerCompat.from(MainActivity.context);
 
-        binding.buttonDecrement.setOnClickListener(view1 -> {
+        binding.buttonAnim.setOnClickListener(view1 -> {
+            SendAnimNotification();
+        });
+
+        binding.buttonTimeLeftDecrement.setOnClickListener(view1 -> {
+            if (isProgressInit) {
+                minsLeft--;
+            }
+            isProgressInit = true;
             SendProgressNotification();
-            minsLeft--;
-//            minsLeft = Math.max(0, minsLeft - 1);
+        });
+
+        binding.buttonTimeLeftIncrement.setOnClickListener(view1 -> {
+            minsLeft++;
+            SendProgressNotification();
         });
 
         binding.buttonCancel.setOnClickListener(view1 -> {
             SendCancelNotification();
             minsLeft = MAX_MINS_LEFT;
+            isProgressInit = false;
         });
     }
 
@@ -67,6 +79,22 @@ public class GlyphProgressFragment extends Fragment {
     private void SendProgressNotification() {
         Bundle extras = new Bundle();
         extras.putString("android.title", "Pickup in " + minsLeft + " mins");
+
+        // Build notification
+        Notification.Builder notifBuilder = new Notification.Builder(MainActivity.context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .addExtras(extras)
+                .setAutoCancel(true);
+
+        // Send notification
+        notificationManager.notify(NOTIF_ID, notifBuilder.build());
+        HideNotification();
+    }
+
+
+    private void SendAnimNotification() {
+        Bundle extras = new Bundle();
+        extras.putString("android.title", "Finding you a driver");
 
         // Build notification
         Notification.Builder notifBuilder = new Notification.Builder(MainActivity.context, CHANNEL_ID)
