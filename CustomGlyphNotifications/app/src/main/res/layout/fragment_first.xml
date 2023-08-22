@@ -21,7 +21,7 @@
             android:weightSum="1">
 
             <Button
-                android:id="@+id/button_anim"
+                android:id="@+id/button_breathing_anim"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
@@ -36,6 +36,25 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal"
             android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="5dp"
+            android:weightSum="1">
+
+            <Button
+                android:id="@+id/button_flash_anim"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="0.3"
+                android:text="Flash Anim" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="5dp"
             android:weightSum="1">
 
             <Button

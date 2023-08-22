@@ -45,8 +45,12 @@ public class GlyphProgressFragment extends Fragment {
         CreateNotificationChannel();
         notificationManager = NotificationManagerCompat.from(MainActivity.context);
 
-        binding.buttonAnim.setOnClickListener(view1 -> {
-            SendAnimNotification();
+        binding.buttonBreathingAnim.setOnClickListener(view1 -> {
+            TriggerBreathingAnim();
+        });
+
+        binding.buttonFlashAnim.setOnClickListener(view1 -> {
+            TriggerFlashAnim();
         });
 
         binding.buttonTimeLeftDecrement.setOnClickListener(view1 -> {
@@ -54,16 +58,16 @@ public class GlyphProgressFragment extends Fragment {
                 minsLeft--;
             }
             isProgressInit = true;
-            SendProgressNotification();
+            TriggerProgressAnim();
         });
 
         binding.buttonTimeLeftIncrement.setOnClickListener(view1 -> {
             minsLeft++;
-            SendProgressNotification();
+            TriggerProgressAnim();
         });
 
         binding.buttonCancel.setOnClickListener(view1 -> {
-            SendCancelNotification();
+            CancelAnims();
             minsLeft = MAX_MINS_LEFT;
             isProgressInit = false;
         });
@@ -75,43 +79,31 @@ public class GlyphProgressFragment extends Fragment {
         binding = null;
     }
 
-
-    private void SendProgressNotification() {
-        Bundle extras = new Bundle();
-        extras.putString("android.title", "Pickup in " + minsLeft + " mins");
-
-        // Build notification
-        Notification.Builder notifBuilder = new Notification.Builder(MainActivity.context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .addExtras(extras)
-                .setAutoCancel(true);
-
-        // Send notification
-        notificationManager.notify(NOTIF_ID, notifBuilder.build());
-        HideNotification();
-    }
-
-
-    private void SendAnimNotification() {
+    private void TriggerBreathingAnim() {
         Bundle extras = new Bundle();
         extras.putString("android.title", "Finding you a driver");
-
-        // Build notification
-        Notification.Builder notifBuilder = new Notification.Builder(MainActivity.context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .addExtras(extras)
-                .setAutoCancel(true);
-
-        // Send notification
-        notificationManager.notify(NOTIF_ID, notifBuilder.build());
-        HideNotification();
+        SendNotification(extras);
     }
 
+    private void TriggerFlashAnim() {
+        Bundle extras = new Bundle();
+        extras.putString("android.title", "Your driver is here");
+        SendNotification(extras);
+    }
 
-    private void SendCancelNotification() {
+    private void TriggerProgressAnim() {
+        Bundle extras = new Bundle();
+        extras.putString("android.title", "Pickup in " + minsLeft + " mins");
+        SendNotification(extras);
+    }
+
+    private void CancelAnims() {
         Bundle extras = new Bundle();
         extras.putString("android.title", "Cancel Trip");
+        SendNotification(extras);
+    }
 
+    private void SendNotification(Bundle extras) {
         // Build notification
         Notification.Builder notifBuilder = new Notification.Builder(MainActivity.context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -122,8 +114,6 @@ public class GlyphProgressFragment extends Fragment {
         notificationManager.notify(NOTIF_ID, notifBuilder.build());
         HideNotification();
     }
-
-
     private void HideNotification() {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
@@ -133,7 +123,6 @@ public class GlyphProgressFragment extends Fragment {
             }
         }, 200);
     }
-
 
     private void CreateNotificationChannel() {
         CharSequence name = "Glyph Progress Channel";
@@ -147,5 +136,4 @@ public class GlyphProgressFragment extends Fragment {
         NotificationManager notificationManager = MainActivity.context.getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
     }
-
 }

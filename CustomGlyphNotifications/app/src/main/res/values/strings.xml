@@ -10,11 +10,16 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
+<!--    Breathing animation-->
+    <string name="ub__rider_background_work_trip_dispatching">Finding you a driver</string>
+
+<!--    Flash animation-->
+    <string name="ub__driver_arrival_interaction_message">Your driver is here</string>
+
+<!--    Progress animation-->
     <string name="bid_driver_offer_pickup_minute">Pickup in %1$d min</string>
     <string name="bid_driver_offer_pickup_minutes">Pickup in %1$d mins</string>
 
+<!--    Cancel animations-->
     <string name="ub__cancel_trip">Cancel Trip</string>
-
-    <string name="ub__rider_background_work_trip_dispatching">Finding you a driver</string>
-
 </resources>
