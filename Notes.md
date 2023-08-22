@@ -24,3 +24,16 @@ There are a few places in `GlyphNotificationManager` where `finishCurrentGlyph()
 
 - Notification `title` can't be null. 
 - Title should be `Cancel Trip`. 
+
+This works perfectly. I believe it can be used to reset any animation. I just had to remember to add the string from Uber's `strings.xml` which contains the `Cancel Trip` text to my own app's `strings.xml`
+
+
+## Hiding notifications from user
+
+### Attempting to cancel notification immediately sending it
+This does not trigger any LED animation update.
+
+### Attempting to cancel notification with a small delay
+Very hacky approach, but this sort of works. With a delay like 100ms, the notification does not seem to be detected by the `GlyphNotificationListenerService`. Howevever 1000ms works, but the notification icon pops up in the status bar momentarily. 
+
+200ms seems like a magic number where the notification doesn't pop up in the status bar but still gets recognized by `GlyphNotificationListenerService`.

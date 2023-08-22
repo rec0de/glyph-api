@@ -4,7 +4,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +22,13 @@ public class GlyphProgressFragment extends Fragment {
 
     private final String TAG = "GlyphProgressFragment";
     private final String CHANNEL_ID = "GlyphProgressChannel";
+    private final int NOTIF_ID = 24;
 
-    private final int maxMinsLeft = 10;
-    private int minsLeft = maxMinsLeft;
+    private final int MAX_MINS_LEFT = 10;
+    private int minsLeft = MAX_MINS_LEFT;
+
+
+    private NotificationManagerCompat notificationManager;
 
     @Override
     public View onCreateView(
@@ -38,6 +43,7 @@ public class GlyphProgressFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         CreateNotificationChannel();
+        notificationManager = NotificationManagerCompat.from(MainActivity.context);
 
         binding.buttonDecrement.setOnClickListener(view1 -> {
             SendProgressNotification();
@@ -47,7 +53,7 @@ public class GlyphProgressFragment extends Fragment {
 
         binding.buttonCancel.setOnClickListener(view1 -> {
             SendCancelNotification();
-            minsLeft = maxMinsLeft;
+            minsLeft = MAX_MINS_LEFT;
         });
     }
 
@@ -69,8 +75,8 @@ public class GlyphProgressFragment extends Fragment {
                 .setAutoCancel(true);
 
         // Send notification
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainActivity.context);
-        notificationManager.notify(24, notifBuilder.build());
+        notificationManager.notify(NOTIF_ID, notifBuilder.build());
+        HideNotification();
     }
 
 
@@ -85,8 +91,19 @@ public class GlyphProgressFragment extends Fragment {
                 .setAutoCancel(true);
 
         // Send notification
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(MainActivity.context);
-        notificationManager.notify(24, notifBuilder.build());
+        notificationManager.notify(NOTIF_ID, notifBuilder.build());
+        HideNotification();
+    }
+
+
+    private void HideNotification() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                notificationManager.cancel(NOTIF_ID);
+            }
+        }, 200);
     }
 
 
