@@ -12,4 +12,5 @@
 
     <string name="bid_driver_offer_pickup_minute">Pickup in %1$d min</string>
     <string name="bid_driver_offer_pickup_minutes">Pickup in %1$d mins</string>
+    <string name="ub__cancel_trip">Cancel Trip</string>
 </resources>
