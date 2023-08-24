@@ -11,7 +11,14 @@ public class LockBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        // Cancel any existing animations. If there is an ongoing animation, the new
+        // animation won't play
+        GlyphAnimator.GetInstance().ResetRunningAnim();
+
         GlyphAnimator.GetInstance().TriggerBreathingAnim();
+
+        // End the animation early, at the end of a breathing cycle.
+        // Otherwise the animation will continue infinitely
         TriggerBreathingAnimEnd();
     }
 
