@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.core.app.NotificationManagerCompat;
 
@@ -24,16 +25,16 @@ public class GlyphAnimator {
     private final String CHANNEL_ID = "GlyphAnimatorChannel";
     private final int NOTIF_ID = 24;
 
-    private NotificationManagerCompat notificationManager;
+    private NotificationManager notificationManager;
 
     private int maxProgressAmt;
+    private boolean isProgressAnimInt;
 
     public GlyphAnimator() {
-        notificationManager = NotificationManagerCompat.from(MainActivity.context);
         CreateNotificationChannel();
-        ResetRunningAnim();
+        TurnOffRunningAnim();
+        ResetProgressAnimState();
     }
-
 
     public void TriggerBreathingAnim() {
         Bundle extras = new Bundle();
@@ -49,20 +50,31 @@ public class GlyphAnimator {
 
 
     public void InitializeProgressAnim(int maxProgressAmt) {
-        ResetRunningAnim();
+        isProgressAnimInt = true;
+        TurnOffRunningAnim();
         this.maxProgressAmt = maxProgressAmt;
         UpdateProgressAnim(this.maxProgressAmt);
     }
 
 
     public void UpdateProgressAnim(int newProgressAmt) {
+        if (!isProgressAnimInt) {
+            Log.w(TAG, "Initialize progress anim before updating progress");
+            return;
+        }
         Bundle extras = new Bundle();
         extras.putString("android.title", "Pickup in " + newProgressAmt + " mins");
         SendSpoofNotification(extras);
     }
 
 
-    public void ResetRunningAnim() {
+    public void ResetProgressAnimState() {
+        isProgressAnimInt = false;
+        maxProgressAmt = 0;
+    }
+
+
+    public void TurnOffRunningAnim() {
         Bundle extras = new Bundle();
         extras.putString("android.title", "Cancel Trip");
         SendSpoofNotification(extras);
@@ -89,7 +101,7 @@ public class GlyphAnimator {
             public void run() {
                 notificationManager.cancel(NOTIF_ID);
             }
-        }, 300);
+        }, 500);
     }
 
 
@@ -99,10 +111,11 @@ public class GlyphAnimator {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
         channel.setDescription(description);
-        channel.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        channel.setImportance(importance);
+
         // Register the channel with the system; you can't change the importance
         // or other notification behaviors after this
-        NotificationManager notificationManager = MainActivity.context.getSystemService(NotificationManager.class);
+        notificationManager = MainActivity.context.getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
     }
 }

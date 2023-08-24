@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.session.MediaSession;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -62,12 +64,9 @@ public class UserActionDetectionForegroundService extends Service {
     }
 
     private void RegisterUserActionBroadcastReceivers() {
-        BroadcastReceiver ubr = new UnlockBroadcastReceiver();
-        IntentFilter filter1 = new IntentFilter("android.intent.action.USER_PRESENT");
-        ContextCompat.registerReceiver(getApplicationContext(), ubr, filter1, ContextCompat.RECEIVER_EXPORTED);
-
-        BroadcastReceiver lbr = new LockBroadcastReceiver();
-        IntentFilter filter2 = new IntentFilter("android.intent.action.SCREEN_OFF");
-        ContextCompat.registerReceiver(getApplicationContext(), lbr, filter2, ContextCompat.RECEIVER_EXPORTED);
+        Context context = getApplicationContext();
+        UnlockBroadcastReceiver.Register(context);
+        LockBroadcastReceiver.Register(context);
+        MusicBroadcastReceiver.Register(context);
     }
 }

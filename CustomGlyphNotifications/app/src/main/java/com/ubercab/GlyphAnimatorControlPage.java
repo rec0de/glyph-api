@@ -65,7 +65,7 @@ public class GlyphAnimatorControlPage extends Fragment {
         });
 
         binding.buttonCancel.setOnClickListener(view1 -> {
-            GlyphAnimator.GetInstance().ResetRunningAnim();
+            GlyphAnimator.GetInstance().TurnOffRunningAnim();
             minsLeft = MAX_MINS_LEFT;
             isProgressInit = false;
         });
