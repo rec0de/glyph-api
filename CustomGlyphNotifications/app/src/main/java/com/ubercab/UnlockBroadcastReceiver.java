@@ -20,6 +20,14 @@ public class UnlockBroadcastReceiver extends BroadcastReceiver {
         ContextCompat.registerReceiver(context, instance, filter, ContextCompat.RECEIVER_EXPORTED);
     }
 
+    public static void Unregister(Context context) {
+        if (instance == null) {
+            return;
+        }
+        context.unregisterReceiver(instance);
+        instance = null;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         // Cancel any existing animations. If there is an ongoing animation, the new

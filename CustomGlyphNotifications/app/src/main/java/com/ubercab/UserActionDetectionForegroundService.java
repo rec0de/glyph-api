@@ -25,11 +25,12 @@ public class UserActionDetectionForegroundService extends Service {
     private static final String CHANNEL_ID = "UserActionDetectionForegroundServiceChannel";
 
     private NotificationManager notificationManager;
+    private UserActionDetectionController controller;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        RegisterUserActionBroadcastReceivers();
+        controller = new UserActionDetectionController(getApplicationContext());
     }
 
     @Nullable
@@ -63,10 +64,5 @@ public class UserActionDetectionForegroundService extends Service {
             notificationManager.createNotificationChannel(channel);
     }
 
-    private void RegisterUserActionBroadcastReceivers() {
-        Context context = getApplicationContext();
-        UnlockBroadcastReceiver.Register(context);
-        LockBroadcastReceiver.Register(context);
-        MusicBroadcastReceiver.Register(context);
-    }
+
 }

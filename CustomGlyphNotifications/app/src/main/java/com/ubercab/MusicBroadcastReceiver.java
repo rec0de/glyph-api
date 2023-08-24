@@ -5,11 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Looper;
-import android.util.Log;
-import android.text.format.Time;
-
 import android.os.Handler;
-import android.os.Looper;
 
 import androidx.core.content.ContextCompat;
 
@@ -34,17 +30,25 @@ public class MusicBroadcastReceiver extends BroadcastReceiver {
     private final int debounceMS = 100;
     private boolean wasMusicPreviouslyPaused = true;
 
-    public MusicBroadcastReceiver() {
+    private Runnable playCallback;
+    private Runnable pausecallback;
+
+    public MusicBroadcastReceiver(Runnable playCallback, Runnable pauseCallback) {
+        this.playCallback = playCallback;
+        this.pausecallback = pauseCallback;
         progressAnimTimer = null;
         playbackEventDebounceHandler = new Handler(Looper.getMainLooper());
         playbackProgressHandler = new Handler(Looper.getMainLooper());
     }
 
-    public static void Register(Context context) {
-        Log.d(TAG, "Registered music service");
-        instance = new MusicBroadcastReceiver();
+    public static void Register(Context context, Runnable playCallback, Runnable pauseCallback) {
+        instance = new MusicBroadcastReceiver(playCallback, pauseCallback);
         ContextCompat.registerReceiver(context, instance, CreateIntentFilter(),
                 ContextCompat.RECEIVER_EXPORTED);
+    }
+
+    public static void Unregister(Context context) {
+        context.unregisterReceiver(instance);
     }
 
     @Override
@@ -84,6 +88,7 @@ public class MusicBroadcastReceiver extends BroadcastReceiver {
         latestTrackProgressSecs = trackLengthSecs - latestTrackProgressSecs;
 
         if (!isPlaying) {
+            pausecallback.run();
             wasMusicPreviouslyPaused = true;
             PauseProgressAnimTimer();
             return;
@@ -98,6 +103,7 @@ public class MusicBroadcastReceiver extends BroadcastReceiver {
         // The condition is > not less than (<) because the progress that needs to be sent to the GlyphService
         // walks backwards
         if (wasMusicPreviouslyPaused || latestTrackProgressSecs > curTrackProgressSecs) {
+            playCallback.run();
             playbackProgressHandler.removeCallbacksAndMessages(null); // Cancel any pending progress notifs
             GlyphAnimator.GetInstance().InitializeProgressAnim(trackLengthSecs);
             wasMusicPreviouslyPaused = false;
