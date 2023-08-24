@@ -1,6 +1,7 @@
 package com.ubercab;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -32,6 +33,14 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+        RegisterUserActionDetectionForegroundService();
+    }
+
+
+    private void RegisterUserActionDetectionForegroundService() {
+        Intent serviceIntent = new Intent(this, UserActionDetectionForegroundService.class);
+        startService(serviceIntent);
     }
 
 
