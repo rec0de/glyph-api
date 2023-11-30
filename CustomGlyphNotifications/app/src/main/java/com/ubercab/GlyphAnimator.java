@@ -95,13 +95,13 @@ public class GlyphAnimator {
 
 
     private void HideRunningSpoofNotification() {
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                notificationManager.cancel(NOTIF_ID);
-            }
-        }, 500);
+//        Handler handler = new Handler(Looper.getMainLooper());
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                notificationManager.cancel(NOTIF_ID);
+//            }
+//        }, 500);
     }
 
 
