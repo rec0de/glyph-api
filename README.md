@@ -2,6 +2,8 @@
 
 _How you could use the glyph lights on your nothing phone, and why you can't, and how you maybe could anyway?_
 
+**Update: Nothing has released [official documentation of the Glyph API](https://github.com/Nothing-Developer-Programme/Glyph-Developer-Kit) and the API key application process appears to open up soon.**
+
 It seems there is not a lot of information out there on how the glyph lights on a nothing phone (i'll be talking about the phone 2, but this should largely also apply to the phone 1) work and how they can be controlled by third-party, i.e. non-root apps. We just know that it has to work _somehow_ because the Glyph Composer app is able to do so. So I did a little reversing to shed some light:
 
 # Theory
